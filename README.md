@@ -33,7 +33,9 @@ Below 40% → D (Keep studying)
 5. JDK (Java Development Kit)
 6. JVM (Java Virtual Machine)
 
-
+# How to Run
+1. Open the project in VS Code.
+2. Run the following file:
 
 
 
