@@ -1,0 +1,227 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class QuizGame {
+
+    static String[] questions = {
+        "What is the default value of an int in Java?",
+        "Which keyword is used to inherit a class?",
+        "What does JVM stand for?",
+        "Which is NOT a primitive data type in Java?",
+        "What is the size of char in Java?",
+        "Which is the entry point of a Java program?",
+        "What does the final keyword do to a variable?",
+        "Which collection allows duplicates and keeps order?",
+        "What is the output of: System.out.println(10 / 3);",
+        "Which exception is thrown when dividing int by zero?"
+    };
+
+    static String[][] options = {
+        {"-1", "0", "1", "null"},
+        {"implements", "extends", "inherits", "super"},
+        {"Java Virtual Memory", "Java Variable Method", "Java Virtual Machine", "Java Visual Model"},
+        {"int", "boolean", "String", "char"},
+        {"8 bits", "16 bits", "32 bits", "64 bits"},
+        {"start()", "run()", "init()", "main()"},
+        {"Makes it static", "Makes it constant", "Makes it volatile", "Makes it transient"},
+        {"HashSet", "TreeSet", "ArrayList", "HashMap"},
+        {"3.33", "3.0", "3", "Error"},
+        {"NullPointerException", "ArithmeticException", "NumberFormatException", "IllegalArgumentException"}
+    };
+
+    static int[] answers = {1, 1, 2, 2, 1, 3, 1, 2, 2, 1};
+
+    static String[] explanations = {
+        "Default value of int is 0.",
+        "extends is used for class inheritance.",
+        "JVM = Java Virtual Machine.",
+        "String is a class, not a primitive.",
+        "char is 16 bits in Java.",
+        "main() is the entry point.",
+        "final makes a variable a constant.",
+        "ArrayList allows duplicates and keeps insertion order.",
+        "Integer division 10/3 = 3 (decimal dropped).",
+        "ArithmeticException is thrown for division by zero."
+    };
+
+    static int current = 0;
+    static int score = 0;
+    static int correct = 0;
+
+    static JFrame frame;
+    static JLabel topLabel, scoreLabel, questionLabel, feedbackLabel;
+    static JButton[] optBtns = new JButton[4];
+    static JButton nextBtn;
+
+    public static void main(String[] args) {
+        frame = new JFrame("Java Quiz Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(560, 460);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout());
+
+        // Top bar
+        JPanel top = new JPanel(new BorderLayout());
+        top.setBackground(new Color(37, 99, 235));
+        top.setBorder(BorderFactory.createEmptyBorder(12, 18, 12, 18));
+        topLabel = new JLabel("Java Programming Quiz");
+        topLabel.setFont(new Font("Dialog", Font.BOLD, 16));
+        topLabel.setForeground(Color.WHITE);
+        scoreLabel = new JLabel("Score: 0");
+        scoreLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+        scoreLabel.setForeground(Color.WHITE);
+        top.add(topLabel, BorderLayout.WEST);
+        top.add(scoreLabel, BorderLayout.EAST);
+        frame.add(top, BorderLayout.NORTH);
+
+        // Centre
+        JPanel centre = new JPanel();
+        centre.setLayout(new BoxLayout(centre, BoxLayout.Y_AXIS));
+        centre.setBackground(new Color(248, 248, 246));
+        centre.setBorder(BorderFactory.createEmptyBorder(16, 20, 10, 20));
+
+        questionLabel = new JLabel();
+        questionLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+        questionLabel.setForeground(new Color(20, 20, 20));
+        questionLabel.setOpaque(true);
+        questionLabel.setBackground(Color.WHITE);
+        questionLabel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 218)),
+            BorderFactory.createEmptyBorder(12, 14, 12, 14)
+        ));
+        questionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        centre.add(questionLabel);
+        centre.add(Box.createVerticalStrut(12));
+
+        for (int i = 0; i < 4; i++) {
+            final int idx = i;
+            optBtns[i] = new JButton();
+            optBtns[i].setFont(new Font("Dialog", Font.PLAIN, 14));
+            optBtns[i].setHorizontalAlignment(SwingConstants.LEFT);
+            optBtns[i].setFocusPainted(false);
+            optBtns[i].setBackground(Color.WHITE);
+            optBtns[i].setForeground(new Color(20, 20, 20));
+            optBtns[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
+            optBtns[i].setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 218)),
+                BorderFactory.createEmptyBorder(9, 14, 9, 14)
+            ));
+            optBtns[i].setAlignmentX(Component.LEFT_ALIGNMENT);
+            optBtns[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            optBtns[i].addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    handleAnswer(idx);
+                }
+            });
+            centre.add(optBtns[i]);
+            centre.add(Box.createVerticalStrut(7));
+        }
+
+        feedbackLabel = new JLabel(" ");
+        feedbackLabel.setFont(new Font("Dialog", Font.PLAIN, 13));
+        feedbackLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        centre.add(Box.createVerticalStrut(4));
+        centre.add(feedbackLabel);
+
+        frame.add(centre, BorderLayout.CENTER);
+
+        // Bottom
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottom.setBackground(new Color(248, 248, 246));
+        bottom.setBorder(BorderFactory.createEmptyBorder(0, 18, 12, 18));
+        nextBtn = new JButton("Next");
+        nextBtn.setFont(new Font("Dialog", Font.BOLD, 14));
+        nextBtn.setBackground(new Color(37, 99, 235));
+        nextBtn.setForeground(Color.WHITE);
+        nextBtn.setFocusPainted(false);
+        nextBtn.setBorderPainted(false);
+        nextBtn.setOpaque(true);
+        nextBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        nextBtn.setBorder(BorderFactory.createEmptyBorder(10, 22, 10, 22));
+        nextBtn.setVisible(false);
+        nextBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                current++;
+                if (current < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        });
+        bottom.add(nextBtn);
+        frame.add(bottom, BorderLayout.SOUTH);
+
+        loadQuestion();
+        frame.setVisible(true);
+    }
+
+    static void loadQuestion() {
+        topLabel.setText("Question " + (current + 1) + " of " + questions.length);
+        scoreLabel.setText("Score: " + score);
+        questionLabel.setText("<html><body style='width:460px'>" + questions[current] + "</body></html>");
+        feedbackLabel.setText(" ");
+        nextBtn.setVisible(false);
+        String[] letters = {"A) ", "B) ", "C) ", "D) "};
+        for (int i = 0; i < 4; i++) {
+            optBtns[i].setText(letters[i] + options[current][i]);
+            optBtns[i].setEnabled(true);
+            optBtns[i].setBackground(Color.WHITE);
+            optBtns[i].setForeground(new Color(20, 20, 20));
+            optBtns[i].setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 218)),
+                BorderFactory.createEmptyBorder(9, 14, 9, 14)
+            ));
+        }
+    }
+
+    static void handleAnswer(int idx) {
+        for (JButton b : optBtns) b.setEnabled(false);
+        if (idx == answers[current]) {
+            score += 10;
+            correct++;
+            optBtns[idx].setBackground(new Color(220, 252, 231));
+            optBtns[idx].setForeground(new Color(21, 128, 61));
+            feedbackLabel.setForeground(new Color(21, 128, 61));
+            feedbackLabel.setText("Correct!  " + explanations[current]);
+        } else {
+            score -= 3;
+            optBtns[idx].setBackground(new Color(254, 226, 226));
+            optBtns[idx].setForeground(new Color(185, 28, 28));
+            optBtns[answers[current]].setBackground(new Color(220, 252, 231));
+            optBtns[answers[current]].setForeground(new Color(21, 128, 61));
+            feedbackLabel.setForeground(new Color(185, 28, 28));
+            feedbackLabel.setText("Wrong.  " + explanations[current]);
+        }
+        scoreLabel.setText("Score: " + score);
+        nextBtn.setText(current < questions.length - 1 ? "Next" : "See Results");
+        nextBtn.setVisible(true);
+    }
+
+    static void showResults() {
+        int pct = (int) Math.round(correct * 100.0 / questions.length);
+        String grade;
+        if (pct == 100) grade = "S - Perfect!";
+        else if (pct >= 80) grade = "A - Excellent!";
+        else if (pct >= 60) grade = "B - Good job!";
+        else if (pct >= 40) grade = "C - Keep practicing!";
+        else grade = "D - Keep studying!";
+
+        String msg = "Score: " + score + " / 100\n"
+                   + "Correct: " + correct + " / " + questions.length + "\n"
+                   + "Accuracy: " + pct + "%\n"
+                   + "Grade: " + grade;
+
+        int choice = JOptionPane.showOptionDialog(frame, msg, "Quiz Results",
+            JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
+            null, new String[]{"Play Again", "Exit"}, "Play Again");
+
+        if (choice == 0) {
+            current = 0; score = 0; correct = 0;
+            loadQuestion();
+        } else {
+            System.exit(0);
+        }
+    }
+}
