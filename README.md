@@ -1,5 +1,5 @@
 # SoftGrowTech-Quiz-Game
-A simple GUI based Quiz game made by Java                                                                                      Gameplay Features:
+A simple GUI based Quiz game made by Java                                                                                     
 # Featuers
 1.10 Java Questions — covers real Java topics like data types, OOP, JVM, exceptions, collections, and more.
 
